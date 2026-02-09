@@ -150,18 +150,49 @@ export default function SummaryPage() {
         </div>
 
         <div className="flex gap-2">
-          <motion.button
-            onClick={() => {
-              if (confirm('Load demo data? This will add 7 days of sample entries.')) {
-                loadDemoData()
-              }
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl text-sm font-medium hover:from-green-500 hover:to-emerald-500 transition-colors"
-          >
-            Demo
-          </motion.button>
+          <div className="relative">
+            <motion.button
+              onClick={() => {
+                if (confirm('Load demo data? This will add 7 days of sample entries.')) {
+                  loadDemoData()
+                }
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl text-sm font-medium hover:from-green-500 hover:to-emerald-500 transition-colors"
+            >
+              Demo
+            </motion.button>
+
+            {/* Demo Hint Arrow */}
+            <AnimatePresence>
+              {showDemoHint && savedDays.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ delay: 0.3 }}
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 cursor-pointer"
+                  onClick={() => setShowDemoHint(false)}
+                >
+                  <motion.div
+                    animate={{
+                      y: [0, -10, 0],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1.5,
+                      ease: "easeInOut"
+                    }}
+                    className="text-5xl"
+                  >
+                    ☝️
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <motion.button
             onClick={() => setShowImportModal(true)}
             whileHover={{ scale: 1.05 }}
@@ -173,34 +204,6 @@ export default function SummaryPage() {
           </motion.button>
         </div>
       </motion.header>
-
-      {/* Demo Hint Arrow */}
-      <AnimatePresence>
-        {showDemoHint && savedDays.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ delay: 0.3 }}
-            className="absolute top-16 right-40 z-50 cursor-pointer"
-            onClick={() => setShowDemoHint(false)}
-          >
-            <motion.div
-              animate={{
-                y: [0, -10, 0],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 1.5,
-                ease: "easeInOut"
-              }}
-              className="text-5xl"
-            >
-              ☝️
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Content */}
       <main className="px-6 py-4 space-y-6">
