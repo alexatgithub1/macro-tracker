@@ -178,32 +178,25 @@ export default function SummaryPage() {
       <AnimatePresence>
         {showDemoHint && savedDays.length === 0 && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ delay: 0.2 }}
-            className="absolute top-16 right-6 flex flex-col items-end gap-2 z-50"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ delay: 0.3 }}
+            className="absolute top-20 right-20 z-50 cursor-pointer"
             onClick={() => setShowDemoHint(false)}
           >
             <motion.div
               animate={{
-                y: [0, -8, 0],
+                y: [0, -10, 0],
               }}
               transition={{
                 repeat: Infinity,
                 duration: 1.5,
                 ease: "easeInOut"
               }}
-              className="text-4xl"
+              className="text-5xl"
             >
               ☝️
-            </motion.div>
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg"
-            >
-              Try demo data!
             </motion.div>
           </motion.div>
         )}
