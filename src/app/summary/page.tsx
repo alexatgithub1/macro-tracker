@@ -182,7 +182,7 @@ export default function SummaryPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             transition={{ delay: 0.3 }}
-            className="absolute top-20 right-20 z-50 cursor-pointer"
+            className="absolute top-14 right-32 z-50 cursor-pointer"
             onClick={() => setShowDemoHint(false)}
           >
             <motion.div
