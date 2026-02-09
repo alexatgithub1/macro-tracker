@@ -28,7 +28,10 @@ interface AppState {
   setCurrentDate: (date: string) => void
   addFoodLog: (foodLog: Omit<FoodLog, 'id' | 'daily_entry_id'>) => void
   addWorkoutLog: (workoutLog: Omit<WorkoutLog, 'id' | 'daily_entry_id'>) => void
+  deleteFoodLog: (id: string) => void
+  deleteWorkoutLog: (id: string) => void
   updateWeight: (weight_lb: number) => void
+  updateNotes: (notes: string) => void
   calculateTotals: () => void
   saveCurrentDay: () => void
 }
@@ -80,11 +83,31 @@ export const useStore = create<AppState>((set, get) => ({
     get().calculateTotals()
   },
 
+  deleteFoodLog: (id) => {
+    set((state) => ({
+      foodLogs: state.foodLogs.filter((log) => log.id !== id),
+    }))
+    get().calculateTotals()
+  },
+
+  deleteWorkoutLog: (id) => {
+    set((state) => ({
+      workoutLogs: state.workoutLogs.filter((log) => log.id !== id),
+    }))
+    get().calculateTotals()
+  },
+
   updateWeight: (weight_lb) => {
     set((state) => ({
       user: { ...state.user, weight_lb },
     }))
     get().calculateTotals()
+  },
+
+  updateNotes: (notes) => {
+    set((state) => ({
+      dailyEntry: state.dailyEntry ? { ...state.dailyEntry, journal_text: notes } : null,
+    }))
   },
 
   calculateTotals: () => {

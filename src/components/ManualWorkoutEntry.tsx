@@ -105,15 +105,27 @@ export default function ManualWorkoutEntry({ onClose }: ManualWorkoutEntryProps)
             </p>
           </div>
 
-          <motion.button
-            onClick={handleSubmit}
-            disabled={isProcessing}
-            whileHover={{ scale: isProcessing ? 1 : 1.02 }}
-            whileTap={{ scale: isProcessing ? 1 : 0.98 }}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-medium hover:from-purple-500 hover:to-pink-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isProcessing ? 'Processing...' : 'Add Workout'}
-          </motion.button>
+          <div className="flex gap-3">
+            <motion.button
+              onClick={onClose}
+              disabled={isProcessing}
+              whileHover={{ scale: isProcessing ? 1 : 1.02 }}
+              whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+              className="px-6 py-3 bg-border rounded-xl font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </motion.button>
+
+            <motion.button
+              onClick={handleSubmit}
+              disabled={isProcessing}
+              whileHover={{ scale: isProcessing ? 1 : 1.02 }}
+              whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+              className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-medium hover:from-purple-500 hover:to-pink-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isProcessing ? 'Processing...' : 'Add Workout'}
+            </motion.button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
