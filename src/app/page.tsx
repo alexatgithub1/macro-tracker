@@ -2,7 +2,7 @@
 
 import { useStore } from '@/lib/store'
 import { useEffect, useState } from 'react'
-import { Mic, Camera, Plus, Flame, Beef, TrendingDown, Dumbbell, X, BarChart3, Calendar, ChevronLeft, ChevronRight, StickyNote, Sparkles } from 'lucide-react'
+import { Mic, Camera, Plus, Flame, Beef, TrendingDown, Dumbbell, X, BarChart3, Calendar, ChevronLeft, ChevronRight, StickyNote, Sparkles, Minus, Wheat, Droplet, Activity, Drumstick } from 'lucide-react'
 import { format, addDays, subDays, parseISO, isToday } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
@@ -21,6 +21,8 @@ export default function TodayView() {
   const [hoveredMeal, setHoveredMeal] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
   const [isGeneratingNotes, setIsGeneratingNotes] = useState(false)
+  const [isEditingWeight, setIsEditingWeight] = useState(false)
+  const [weightInput, setWeightInput] = useState('')
 
   useEffect(() => {
     calculateTotals()
@@ -56,7 +58,7 @@ export default function TodayView() {
   }
 
   const proteinTarget = Math.round(user.weight_lb * user.protein_target_g_per_lb)
-  const calorieTarget = 2400
+  const calorieTarget = 2200
   const proteinProgress = dailyEntry ? (dailyEntry.total_protein_g / proteinTarget) * 100 : 0
   const calorieProgress = dailyEntry ? (dailyEntry.total_intake_kcal / calorieTarget) * 100 : 0
 
@@ -71,7 +73,7 @@ export default function TodayView() {
       current: dailyEntry?.total_intake_kcal || 0,
       target: calorieTarget,
       unit: 'kcal',
-      color: 'from-orange-500 to-red-500',
+      color: 'from-blue-600 to-purple-600',
       percentage: Math.min(calorieProgress, 100)
     },
     {
@@ -80,8 +82,37 @@ export default function TodayView() {
       current: dailyEntry?.total_protein_g || 0,
       target: proteinTarget,
       unit: 'g',
-      color: 'from-blue-500 to-cyan-500',
+      color: 'from-blue-500 to-blue-400',
       percentage: Math.min(proteinProgress, 100)
+    },
+    {
+      icon: Wheat,
+      label: 'Carbs',
+      current: dailyEntry?.total_carbs_g || 0,
+      target: 180,
+      unit: 'g',
+      color: 'from-blue-600 to-blue-500',
+      percentage: Math.min(((dailyEntry?.total_carbs_g || 0) / 180) * 100, 100)
+    },
+    {
+      icon: Droplet,
+      label: 'Fat',
+      current: dailyEntry?.total_fat_g || 0,
+      target: 65,
+      unit: 'g',
+      color: 'from-blue-700 to-blue-600',
+      percentage: Math.min(((dailyEntry?.total_fat_g || 0) / 65) * 100, 100)
+    },
+    {
+      icon: Activity,
+      label: 'Burned',
+      current: dailyEntry?.total_burn_kcal || 0,
+      target: 2500,
+      unit: 'kcal',
+      color: 'from-orange-500 to-amber-500',
+      percentage: Math.min(((dailyEntry?.total_burn_kcal || 0) / 2500) * 100, 100),
+      showBMRLine: true,
+      bmrPercentage: (1800 / 2500) * 100
     },
     {
       icon: TrendingDown,
@@ -105,13 +136,9 @@ export default function TodayView() {
         className="px-6 py-4 flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <motion.div
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.5 }}
-            className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center"
-          >
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <Calendar className="w-4 h-4" />
-          </motion.div>
+          </div>
           <div className="flex items-center gap-1">
             <motion.button
               onClick={() => {
@@ -165,19 +192,52 @@ export default function TodayView() {
           <div className="relative">
             <div className="flex items-center justify-between">
               <div className="flex items-baseline gap-2">
-                <motion.span
-                  className="text-6xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  {user.weight_lb.toFixed(1)}
-                </motion.span>
+                {isEditingWeight ? (
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={weightInput}
+                    onChange={(e) => setWeightInput(e.target.value)}
+                    onBlur={() => {
+                      const newWeight = parseFloat(weightInput)
+                      if (!isNaN(newWeight) && newWeight > 0) {
+                        updateWeight(newWeight)
+                      }
+                      setIsEditingWeight(false)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const newWeight = parseFloat(weightInput)
+                        if (!isNaN(newWeight) && newWeight > 0) {
+                          updateWeight(newWeight)
+                        }
+                        setIsEditingWeight(false)
+                      } else if (e.key === 'Escape') {
+                        setIsEditingWeight(false)
+                      }
+                    }}
+                    autoFocus
+                    className="text-6xl font-bold bg-transparent border-b-2 border-blue-500 outline-none w-40 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                ) : (
+                  <motion.span
+                    onClick={() => {
+                      setWeightInput(user.weight_lb.toString())
+                      setIsEditingWeight(true)
+                    }}
+                    className="text-6xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent cursor-pointer"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {user.weight_lb.toFixed(1)}
+                  </motion.span>
+                )}
                 <span className="text-text-secondary text-xl">lb</span>
               </div>
 
               {/* Weight Controls */}
               <div className="flex flex-col gap-2">
                 <motion.button
-                  onClick={() => updateWeight(user.weight_lb + 0.5)}
+                  onClick={() => updateWeight(user.weight_lb + 0.1)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl p-2 transition-all"
@@ -185,12 +245,12 @@ export default function TodayView() {
                   <Plus className="w-5 h-5" />
                 </motion.button>
                 <motion.button
-                  onClick={() => updateWeight(Math.max(0, user.weight_lb - 0.5))}
+                  onClick={() => updateWeight(Math.max(0, user.weight_lb - 0.1))}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl p-2 transition-all"
                 >
-                  <X className="w-5 h-5 rotate-0" style={{ strokeWidth: 3 }} />
+                  <Minus className="w-5 h-5" style={{ strokeWidth: 3 }} />
                 </motion.button>
               </div>
             </div>
@@ -246,7 +306,9 @@ export default function TodayView() {
                     >
                       {stat.label === 'Deficit' || stat.label === 'Surplus' || stat.label === 'Balance'
                         ? `${stat.isDeficit ? '+' : stat.isSurplus ? '-' : ''}${stat.current}${stat.unit}`
-                        : `${stat.current} / ${stat.target}${stat.unit}`
+                        : stat.target !== null
+                        ? `${stat.current} / ${stat.target}${stat.unit}`
+                        : `${stat.current}${stat.unit}`
                       }
                     </motion.span>
                   </div>
@@ -258,6 +320,12 @@ export default function TodayView() {
                       animate={{ width: `${stat.percentage}%` }}
                       transition={{ delay: 0.5 + index * 0.1, duration: 0.8, ease: "easeOut" }}
                     />
+                    {stat.showBMRLine && (
+                      <div
+                        className="absolute inset-y-0 w-0.5 bg-white/40"
+                        style={{ left: `${stat.bmrPercentage}%` }}
+                      />
+                    )}
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                       animate={{ x: ['-100%', '100%'] }}
@@ -288,7 +356,15 @@ export default function TodayView() {
             onClick={() => setShowAddMenu(!showAddMenu)}
             whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
           >
-            <h2 className="text-base font-semibold">Meals</h2>
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ rotate: [0, -15, 15, 0] }}
+                transition={{ duration: 0.5 }}
+              >
+                <Drumstick className="w-5 h-5 text-orange-400" />
+              </motion.div>
+              <h2 className="text-base font-semibold">Meals</h2>
+            </div>
             <motion.div
               animate={{ rotate: showAddMenu ? 45 : 0 }}
               transition={{ duration: 0.3 }}
@@ -384,10 +460,15 @@ export default function TodayView() {
                   animate={{ opacity: 1, y: 0 }}
                   className="p-3 bg-border rounded-xl relative group"
                 >
-                  <div className="font-medium text-sm mb-1 pr-8">{log.parsed_description}</div>
-                  <div className="flex gap-3 text-xs text-text-secondary">
+                  <div className="font-medium text-sm mb-2 pr-8 whitespace-pre-line">{log.parsed_description}</div>
+                  <div className="flex gap-3 text-xs text-text-secondary flex-wrap">
                     <span>{log.calories_kcal} kcal</span>
+                    <span>•</span>
                     <span>{log.protein_g}g protein</span>
+                    <span>•</span>
+                    <span>{log.carbs_g}g carbs</span>
+                    <span>•</span>
+                    <span>{log.fat_g}g fat</span>
                   </div>
                   <motion.button
                     onClick={() => deleteFoodLog(log.id)}
@@ -395,7 +476,7 @@ export default function TodayView() {
                     whileTap={{ scale: 0.9 }}
                     className="absolute top-2 right-2 bg-red-500/20 hover:bg-red-500 rounded-lg p-1.5 transition-colors opacity-0 group-hover:opacity-100"
                   >
-                    <X className="w-4 h-4 text-red-400 hover:text-white" />
+                    <Minus className="w-4 h-4 text-red-400 hover:text-white" />
                   </motion.button>
                 </motion.div>
               ))}
@@ -461,7 +542,7 @@ export default function TodayView() {
                     whileTap={{ scale: 0.9 }}
                     className="absolute top-2 right-2 bg-red-500/20 hover:bg-red-500 rounded-lg p-1.5 transition-colors opacity-0 group-hover:opacity-100"
                   >
-                    <X className="w-4 h-4 text-red-400 hover:text-white" />
+                    <Minus className="w-4 h-4 text-red-400 hover:text-white" />
                   </motion.button>
                 </motion.div>
               ))}

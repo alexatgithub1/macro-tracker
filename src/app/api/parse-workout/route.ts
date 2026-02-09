@@ -31,13 +31,14 @@ Workout input: "${input}"
 
 Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
 {
-  "type": "strength" | "cardio" | "walk" | "other",
+  "type": "activity name" (e.g. "Running", "Weightlifting", "Cycling", "Swimming", etc.),
   "duration": number (in minutes),
   "calories_burned": number (estimated kcal burned),
   "notes": "brief summary of the workout" | null
 }
 
 Guidelines:
+- Use the actual activity name from the input (e.g., "Running", "Weightlifting", "Yoga", "Basketball")
 - Be realistic with calorie estimates (don't overestimate)
 - For strength training: ~5-8 kcal per minute
 - For running: ~10-12 kcal per minute

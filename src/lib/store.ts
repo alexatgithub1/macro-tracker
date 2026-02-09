@@ -1,10 +1,11 @@
 'use client'
 
 import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { DailyEntry, FoodLog, WorkoutLog, User } from './types'
 import { format } from 'date-fns'
 
-interface SavedDay {
+export interface SavedDay {
   date: string
   totalCalories: number
   totalProtein: number
@@ -34,6 +35,8 @@ interface AppState {
   updateNotes: (notes: string) => void
   calculateTotals: () => void
   saveCurrentDay: () => void
+  importSavedDays: (days: SavedDay[]) => void
+  deleteSavedDay: (date: string) => void
 }
 
 // Mock user data
@@ -42,18 +45,20 @@ const mockUser: User = {
   age: 38,
   sex: 'M',
   height_cm: 183,
-  weight_lb: 185,
+  weight_lb: 169,
   activity_multiplier: 1.5,
   protein_target_g_per_lb: 1.0,
 }
 
-export const useStore = create<AppState>((set, get) => ({
-  user: mockUser,
-  currentDate: format(new Date(), 'yyyy-MM-dd'),
-  dailyEntry: null,
-  foodLogs: [],
-  workoutLogs: [],
-  savedDays: [],
+export const useStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      user: mockUser,
+      currentDate: format(new Date(), 'yyyy-MM-dd'),
+      dailyEntry: null,
+      foodLogs: [],
+      workoutLogs: [],
+      savedDays: [],
 
   setCurrentDate: (date) => set({ currentDate: date }),
 
@@ -113,12 +118,9 @@ export const useStore = create<AppState>((set, get) => ({
   calculateTotals: () => {
     const { user, foodLogs, workoutLogs, currentDate } = get()
 
-    // Calculate BMR (Mifflin-St Jeor)
+    // Fixed BMR
     const weight_kg = user.weight_lb * 0.453592
-    const bmr = 10 * weight_kg + 6.25 * user.height_cm - 5 * user.age + 5
-
-    // Calculate activity calories
-    const activity_kcal = bmr * (user.activity_multiplier - 1)
+    const bmr = 1800
 
     // Calculate exercise burn
     const exercise_burn = workoutLogs.reduce((sum, w) => sum + w.estimated_burn_kcal, 0)
@@ -129,8 +131,8 @@ export const useStore = create<AppState>((set, get) => ({
     const total_carbs = foodLogs.reduce((sum, f) => sum + f.carbs_g, 0)
     const total_fat = foodLogs.reduce((sum, f) => sum + f.fat_g, 0)
 
-    // Total burn
-    const total_burn = Math.round(bmr + activity_kcal + exercise_burn)
+    // Total burn (BMR + exercise)
+    const total_burn = bmr + exercise_burn
 
     // Deficit
     const deficit = total_burn - total_intake
@@ -140,9 +142,9 @@ export const useStore = create<AppState>((set, get) => ({
         id: currentDate,
         date: currentDate,
         weight_kg: weight_kg,
-        bmr_kcal: Math.round(bmr),
-        activity_kcal: Math.round(activity_kcal),
-        total_burn_kcal: total_burn,
+        bmr_kcal: bmr,
+        activity_kcal: 0,
+        total_burn_kcal: Math.round(total_burn),
         total_intake_kcal: Math.round(total_intake),
         total_protein_g: Math.round(total_protein),
         total_carbs_g: Math.round(total_carbs),
@@ -178,4 +180,35 @@ export const useStore = create<AppState>((set, get) => ({
       savedDays: [newSavedDay, ...filtered],
     })
   },
-}))
+
+  importSavedDays: (newDays) => {
+    const { savedDays } = get()
+
+    // Create a map of existing days by date
+    const existingMap = new Map(savedDays.map(day => [day.date, day]))
+
+    // Merge new days, preferring imported data for duplicate dates
+    newDays.forEach(day => {
+      existingMap.set(day.date, day)
+    })
+
+    // Convert back to array and sort by date (newest first)
+    const merged = Array.from(existingMap.values()).sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+
+    set({ savedDays: merged })
+  },
+
+  deleteSavedDay: (date) => {
+    set((state) => ({
+      savedDays: state.savedDays.filter(d => d.date !== date),
+    }))
+  },
+}),
+    {
+      name: 'macro-tracker-storage',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+)
