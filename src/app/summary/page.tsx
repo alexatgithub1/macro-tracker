@@ -1,11 +1,11 @@
 'use client'
 
 import { useStore } from '@/lib/store'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Upload, X, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function SummaryPage() {
@@ -15,6 +15,15 @@ export default function SummaryPage() {
   const [showImportModal, setShowImportModal] = useState(false)
   const [pastedData, setPastedData] = useState('')
   const [hoveredPoint, setHoveredPoint] = useState<{date: string, weight: number, x: number, y: number} | null>(null)
+  const [showDemoHint, setShowDemoHint] = useState(false)
+
+  // Show demo hint on first load if no data
+  useEffect(() => {
+    if (savedDays.length === 0) {
+      const timer = setTimeout(() => setShowDemoHint(true), 500)
+      return () => clearTimeout(timer)
+    }
+  }, [])
 
   const parseCSV = (text: string): any[] => {
     const lines = text.trim().split('\n')
@@ -164,6 +173,41 @@ export default function SummaryPage() {
           </motion.button>
         </div>
       </motion.header>
+
+      {/* Demo Hint Arrow */}
+      <AnimatePresence>
+        {showDemoHint && savedDays.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ delay: 0.2 }}
+            className="absolute top-16 right-6 flex flex-col items-end gap-2 z-50"
+            onClick={() => setShowDemoHint(false)}
+          >
+            <motion.div
+              animate={{
+                y: [0, -8, 0],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 1.5,
+                ease: "easeInOut"
+              }}
+              className="text-4xl"
+            >
+              ☝️
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-lg"
+            >
+              Try demo data!
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Content */}
       <main className="px-6 py-4 space-y-6">
