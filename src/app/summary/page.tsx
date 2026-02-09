@@ -229,7 +229,7 @@ export default function SummaryPage() {
                         fontSize: '15px',
                         padding: 0,
                       }}
-                      formatter={(value: number) => [`${value.toFixed(1)} lbs`, '']}
+                      formatter={(value: number | string) => [`${typeof value === 'number' ? value.toFixed(1) : value} lbs`, '']}
                       cursor={{ stroke: '#333', strokeWidth: 1 }}
                     />
                     <Area
