@@ -37,6 +37,7 @@ interface AppState {
   saveCurrentDay: () => void
   importSavedDays: (days: SavedDay[]) => void
   deleteSavedDay: (date: string) => void
+  loadDemoData: () => void
 }
 
 // Mock user data
@@ -204,6 +205,19 @@ export const useStore = create<AppState>()(
     set((state) => ({
       savedDays: state.savedDays.filter(d => d.date !== date),
     }))
+  },
+
+  loadDemoData: () => {
+    const demoData: SavedDay[] = [
+      { date: '2026-02-09', totalCalories: 2150, totalProtein: 165, totalCarbs: 185, totalFat: 62, deficit: 450, weight: 169.2, mealsCount: 4, workoutsCount: 1 },
+      { date: '2026-02-08', totalCalories: 2050, totalProtein: 170, totalCarbs: 175, totalFat: 58, deficit: 550, weight: 169.5, mealsCount: 3, workoutsCount: 1 },
+      { date: '2026-02-07', totalCalories: 2200, totalProtein: 160, totalCarbs: 195, totalFat: 65, deficit: 350, weight: 169.8, mealsCount: 4, workoutsCount: 0 },
+      { date: '2026-02-06', totalCalories: 1950, totalProtein: 175, totalCarbs: 165, totalFat: 55, deficit: 650, weight: 170.1, mealsCount: 3, workoutsCount: 2 },
+      { date: '2026-02-05', totalCalories: 2100, totalProtein: 168, totalCarbs: 180, totalFat: 60, deficit: 500, weight: 170.4, mealsCount: 4, workoutsCount: 1 },
+      { date: '2026-02-04', totalCalories: 2250, totalProtein: 155, totalCarbs: 200, totalFat: 68, deficit: 300, weight: 170.7, mealsCount: 5, workoutsCount: 1 },
+      { date: '2026-02-03', totalCalories: 2000, totalProtein: 172, totalCarbs: 170, totalFat: 57, deficit: 600, weight: 171.0, mealsCount: 3, workoutsCount: 1 },
+    ]
+    set({ savedDays: demoData })
   },
 }),
     {
