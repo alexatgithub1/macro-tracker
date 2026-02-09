@@ -75,7 +75,91 @@ export default function SummaryPage() {
       </motion.header>
 
       {/* Content */}
-      <main className="px-6 py-4">
+      <main className="px-6 py-4 space-y-6">
+        {/* Weight Graph */}
+        {savedDays.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-surface rounded-2xl p-6 border border-gray-700/50"
+          >
+            <h2 className="text-base font-semibold mb-4">Weight Progress</h2>
+            <div className="relative h-48">
+              <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="none">
+                {/* Grid lines */}
+                <line x1="0" y1="0" x2="400" y2="0" stroke="#374151" strokeWidth="0.5" />
+                <line x1="0" y1="50" x2="400" y2="50" stroke="#374151" strokeWidth="0.5" />
+                <line x1="0" y1="100" x2="400" y2="100" stroke="#374151" strokeWidth="0.5" />
+                <line x1="0" y1="150" x2="400" y2="150" stroke="#374151" strokeWidth="0.5" />
+
+                {/* Weight line */}
+                <polyline
+                  points={savedDays
+                    .slice()
+                    .reverse()
+                    .map((day, i) => {
+                      const x = (i / Math.max(savedDays.length - 1, 1)) * 400
+                      const weights = savedDays.map(d => d.weight)
+                      const minWeight = Math.min(...weights)
+                      const maxWeight = Math.max(...weights)
+                      const range = maxWeight - minWeight || 1
+                      const y = 150 - ((day.weight - minWeight) / range) * 140 - 5
+                      return `${x},${y}`
+                    })
+                    .join(' ')}
+                  fill="none"
+                  stroke="url(#gradient)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* Gradient definition */}
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="50%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                  </linearGradient>
+                </defs>
+
+                {/* Data points */}
+                {savedDays
+                  .slice()
+                  .reverse()
+                  .map((day, i) => {
+                    const x = (i / Math.max(savedDays.length - 1, 1)) * 400
+                    const weights = savedDays.map(d => d.weight)
+                    const minWeight = Math.min(...weights)
+                    const maxWeight = Math.max(...weights)
+                    const range = maxWeight - minWeight || 1
+                    const y = 150 - ((day.weight - minWeight) / range) * 140 - 5
+                    return (
+                      <circle
+                        key={day.date}
+                        cx={x}
+                        cy={y}
+                        r="4"
+                        fill="#8b5cf6"
+                        stroke="#1f2937"
+                        strokeWidth="2"
+                      />
+                    )
+                  })}
+              </svg>
+
+              {/* Weight labels */}
+              <div className="flex justify-between mt-2 text-xs text-text-secondary">
+                <span>{savedDays[savedDays.length - 1]?.weight} lb</span>
+                <span className="text-text-primary font-semibold">
+                  {(savedDays[0]?.weight - savedDays[savedDays.length - 1]?.weight).toFixed(1)} lb change
+                </span>
+                <span>{savedDays[0]?.weight} lb</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {savedDays.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
