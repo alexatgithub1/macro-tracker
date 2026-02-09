@@ -172,7 +172,7 @@ export default function SummaryPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ delay: 0.3 }}
-                  className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 cursor-pointer"
+                  className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 cursor-pointer flex justify-center"
                   onClick={() => setShowDemoHint(false)}
                 >
                   <motion.div
@@ -184,7 +184,7 @@ export default function SummaryPage() {
                       duration: 1.5,
                       ease: "easeInOut"
                     }}
-                    className="text-5xl rotate-180"
+                    className="text-5xl rotate-180 flex items-center justify-center"
                   >
                     ☝️
                   </motion.div>
